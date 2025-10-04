@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  nom       String
+  prenom    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  biens         Bien[]
+  locataires    Locataire[]
+  locations     Location[]
+  organisations Organisation[]
+  notes         Note[]
+  events        Event[]
+}
+
+model Organisation {
+  id          String   @id @default(uuid())
+  userId      String
+  nom         String
+  description String?
+  adresse     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  biens Bien[]
+}
+
+model Bien {
+  id              String   @id @default(uuid())
+  userId          String
+  organisationId  String?
+  adresse         String
+  ville           String
+  codePostal      String
+  type            String
+  superficie      Float?
+  nbChambres      Int?
+  loyerBase       Float
+  charges         Float?
+  description     String?
+  photos          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organisation Organisation? @relation(fields: [organisationId], references: [id], onDelete: SetNull)
+  locations    Location[]
+}
+
+model Locataire {
+  id        String   @id @default(uuid())
+  userId    String
+  nom       String
+  prenom    String
+  email     String
+  telephone String?
+  adresse   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locations LocationLocataire[]
+}
+
+model Location {
+  id            String    @id @default(uuid())
+  userId        String
+  bienId        String
+  dateDebut     DateTime
+  dateFin       DateTime?
+  loyerMensuel  Float
+  depot         Float?
+  statut        String    @default("active")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bien      Bien                  @relation(fields: [bienId], references: [id], onDelete: Cascade)
+  locataires LocationLocataire[]
+  frais     Frais[]
+}
+
+model LocationLocataire {
+  id          String    @id @default(uuid())
+  locationId  String
+  locataireId String
+  createdAt   DateTime  @default(now())
+
+  location  Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  locataire Locataire @relation(fields: [locataireId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, locataireId])
+}
+
+model Frais {
+  id          String   @id @default(uuid())
+  locationId  String
+  type        String
+  montant     Float
+  date        DateTime
+  description String?
+  estPaye     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  userId    String
+  titre     String
+  contenu   String
+  couleur   String   @default("yellow")
+  epingle   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  userId      String
+  titre       String
+  description String?
+  dateDebut   DateTime
+  dateFin     DateTime?
+  type        String   @default("general")
+  couleur     String   @default("blue")
+  rappel      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
