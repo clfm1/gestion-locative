@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { z } from 'zod';
@@ -22,7 +22,7 @@ const bienSchema = z.object({
 
 router.use(authMiddleware);
 
-router.get('/', async (req: AuthRequest, res) => {
+router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const biens = await prisma.bien.findMany({
       where: { userId: req.userId },
@@ -71,7 +71,7 @@ router.get('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.get('/:id', async (req: AuthRequest, res) => {
+router.get('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const bien = await prisma.bien.findFirst({
       where: {
@@ -101,7 +101,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-router.post('/', async (req: AuthRequest, res) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = bienSchema.parse(req.body);
 
@@ -121,7 +121,7 @@ router.post('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = bienSchema.parse(req.body);
 
@@ -150,7 +150,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const bien = await prisma.bien.deleteMany({
       where: {
@@ -170,7 +170,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
 });
 
 // Get locataires for a bien
-router.get('/:id/locataires', async (req: AuthRequest, res) => {
+router.get('/:id/locataires', async (req: AuthRequest, res: Response) => {
   try {
     const bien = await prisma.bien.findFirst({
       where: {
@@ -214,7 +214,7 @@ router.get('/:id/locataires', async (req: AuthRequest, res) => {
 });
 
 // Associate locataires to a bien (create a new location)
-router.post('/:id/locataires', async (req: AuthRequest, res) => {
+router.post('/:id/locataires', async (req: AuthRequest, res: Response) => {
   try {
     const { locataireIds, dateDebut, dateFin, loyerMensuel, depot } = req.body;
 
@@ -278,7 +278,7 @@ router.post('/:id/locataires', async (req: AuthRequest, res) => {
 });
 
 // Remove a locataire from a bien (terminate location)
-router.delete('/:id/locataires/:locataireId', async (req: AuthRequest, res) => {
+router.delete('/:id/locataires/:locataireId', async (req: AuthRequest, res: Response) => {
   try {
     const { id: bienId, locataireId } = req.params;
 

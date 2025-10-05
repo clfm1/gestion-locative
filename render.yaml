@@ -4,7 +4,7 @@ services:
     name: loca16-backend
     runtime: node
     region: frankfurt
-    buildCommand: cd backend && npm install && npx prisma generate && npm run build
+    buildCommand: cd backend && npm ci --include=dev && npx prisma generate && npm run build
     startCommand: cd backend && npx prisma migrate deploy && npm start
     healthCheckPath: /api/health
     envVars:

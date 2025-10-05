@@ -1,13 +1,12 @@
-import { Router } from 'express'
+import { Router, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware, AuthRequest } from '../middleware/auth'
 
 const router = Router()
 const prisma = new PrismaClient()
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { month, year } = req.query
     
     let events
@@ -27,7 +26,7 @@ router.get('/', authMiddleware, async (req, res) => {
       })
     } else {
       events = await prisma.event.findMany({
-        where: { userId: authReq.userId! },
+        where: { userId: req.userId! },
         orderBy: { dateDebut: 'asc' }
       })
     }
@@ -39,9 +38,8 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { titre, description, dateDebut, dateFin, type, couleur, rappel } = req.body
     
     if (!titre || !dateDebut) {
@@ -50,7 +48,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const event = await prisma.event.create({
       data: {
-        userId: authReq.userId!,
+        userId: req.userId!,
         titre,
         description,
         dateDebut: new Date(dateDebut),
@@ -68,9 +66,8 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { id } = req.params
     const { titre, description, dateDebut, dateFin, type, couleur, rappel } = req.body
 
@@ -82,7 +79,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Événement non trouvé' })
     }
 
-    if (existingEvent.userId !== authReq.userId!) {
+    if (existingEvent.userId !== req.userId!) {
       return res.status(403).json({ error: 'Non autorisé' })
     }
 
@@ -106,9 +103,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 })
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { id } = req.params
 
     const existingEvent = await prisma.event.findUnique({
@@ -119,7 +115,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Événement non trouvé' })
     }
 
-    if (existingEvent.userId !== authReq.userId!) {
+    if (existingEvent.userId !== req.userId!) {
       return res.status(403).json({ error: 'Non autorisé' })
     }
 

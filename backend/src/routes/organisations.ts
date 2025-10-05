@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { z } from 'zod';
@@ -14,7 +14,7 @@ const organisationSchema = z.object({
 
 router.use(authMiddleware);
 
-router.get('/', async (req: AuthRequest, res) => {
+router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const organisations = await prisma.organisation.findMany({
       where: { userId: req.userId },
@@ -37,7 +37,7 @@ router.get('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.get('/:id', async (req: AuthRequest, res) => {
+router.get('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const organisation = await prisma.organisation.findFirst({
       where: {
@@ -59,7 +59,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-router.post('/', async (req: AuthRequest, res) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = organisationSchema.parse(req.body);
 
@@ -82,7 +82,7 @@ router.post('/', async (req: AuthRequest, res) => {
   }
 });
 
-router.put('/:id', async (req: AuthRequest, res) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = organisationSchema.parse(req.body);
 
@@ -114,7 +114,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const organisation = await prisma.organisation.deleteMany({
       where: {
@@ -133,7 +133,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
   }
 });
 
-router.post('/:id/biens', async (req: AuthRequest, res) => {
+router.post('/:id/biens', async (req: AuthRequest, res: Response) => {
   try {
     const { bienIds } = req.body;
 
@@ -175,7 +175,7 @@ router.post('/:id/biens', async (req: AuthRequest, res) => {
   }
 });
 
-router.delete('/:id/biens/:bienId', async (req: AuthRequest, res) => {
+router.delete('/:id/biens/:bienId', async (req: AuthRequest, res: Response) => {
   try {
     const organisation = await prisma.organisation.findFirst({
       where: {

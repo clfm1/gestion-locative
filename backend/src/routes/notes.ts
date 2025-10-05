@@ -1,15 +1,14 @@
-import { Router } from 'express'
+import { Router, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authMiddleware, AuthRequest } from '../middleware/auth'
 
 const router = Router()
 const prisma = new PrismaClient()
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const notes = await prisma.note.findMany({
-      where: { userId: authReq.userId! },
+      where: { userId: req.userId! },
       orderBy: [
         { epingle: 'desc' },
         { updatedAt: 'desc' }
@@ -22,9 +21,8 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { titre, contenu, couleur, epingle } = req.body
     
     if (!titre || !contenu) {
@@ -33,7 +31,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const note = await prisma.note.create({
       data: {
-        userId: authReq.userId!,
+        userId: req.userId!,
         titre,
         contenu,
         couleur: couleur || 'yellow',
@@ -48,9 +46,8 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { id } = req.params
     const { titre, contenu, couleur, epingle } = req.body
 
@@ -62,7 +59,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Note non trouvée' })
     }
 
-    if (existingNote.userId !== authReq.userId!) {
+    if (existingNote.userId !== req.userId!) {
       return res.status(403).json({ error: 'Non autorisé' })
     }
 
@@ -83,9 +80,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 })
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const authReq = req as AuthRequest
     const { id } = req.params
 
     const existingNote = await prisma.note.findUnique({
@@ -96,7 +92,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Note non trouvée' })
     }
 
-    if (existingNote.userId !== authReq.userId!) {
+    if (existingNote.userId !== req.userId!) {
       return res.status(403).json({ error: 'Non autorisé' })
     }
 
