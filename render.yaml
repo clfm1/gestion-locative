@@ -6,6 +6,7 @@ services:
     region: frankfurt
     buildCommand: cd backend && npm install && npx prisma generate && npm run build
     startCommand: cd backend && npx prisma migrate deploy && npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -15,8 +16,6 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      - key: PORT
-        value: 3001
 
   # Frontend
   - type: web
